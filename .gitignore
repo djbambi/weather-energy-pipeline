@@ -1,0 +1,31 @@
+# -------------------------
+# Python bytecode & builds
+# -------------------------
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+
+# -------------------------
+# Virtual environments
+# -------------------------
+.venv/
+
+# -------------------------
+# Tooling caches
+# -------------------------
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# -------------------------
+# OS files
+# -------------------------
+.DS_Store
+
+.env
+.env.*
