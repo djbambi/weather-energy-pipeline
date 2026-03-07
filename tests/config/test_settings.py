@@ -65,7 +65,7 @@ def test_settings_raises_when_api_key_is_missing(
     monkeypatch.delenv("OPENWEATHER_API_KEY", raising=False)
 
     with pytest.raises(ValidationError):
-        Settings()
+        Settings(_env_file=None)
 
 
 def test_settings_raises_when_api_key_is_empty(env: pytest.MonkeyPatch) -> None:
