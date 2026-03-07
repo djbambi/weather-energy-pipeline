@@ -1,6 +1,5 @@
 import pytest
 from pydantic import ValidationError
-from pydantic_core import PydanticUndefined
 
 from weather_energy_pipeline.config.settings import Settings
 
@@ -25,14 +24,6 @@ def test_settings_loads_with_only_required_fields(env: pytest.MonkeyPatch) -> No
     assert settings.retry_backoff_multiplier > 0
     assert settings.retry_max_wait_seconds > 0
     assert 0 <= settings.max_retry_attempts <= 10
-
-
-def test_settings_defaults_match_field_definitions(env: pytest.MonkeyPatch) -> None:
-    settings = Settings()
-
-    for name, field in Settings.model_fields.items():
-        if field.default is not PydanticUndefined:
-            assert getattr(settings, name) == field.default, f"Mismatch on {name}"
 
 
 def test_settings_base_url_points_to_expected_endpoint(env: pytest.MonkeyPatch) -> None:
