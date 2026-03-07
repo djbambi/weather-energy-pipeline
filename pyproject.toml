@@ -1,13 +1,16 @@
 [project]
 name = "weather-energy-pipeline"
 version = "0.1.0"
-description = "Add your description here"
+description = "Weather and energy data ingestion pipeline with Prefect orchestration and S3-based medallion architecture."
 readme = "README.md"
 authors = [
     { name = "David Bambrough", email = "djbambrough@mac.com" }
 ]
 requires-python = ">=3.12,<3.13"
-dependencies = []
+dependencies = [
+    "pydantic>=2.12.5",
+    "pydantic-settings>=2.13.1",
+]
 
 [project.scripts]
 weather-energy-pipeline = "weather_energy_pipeline:main"
