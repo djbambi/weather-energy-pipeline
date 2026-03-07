@@ -83,6 +83,7 @@ def test_settings_raises_when_api_key_is_empty(env: pytest.MonkeyPatch) -> None:
         ("RETRY_BACKOFF_MULTIPLIER", "0"),
         ("RETRY_MAX_WAIT_SECONDS", "0"),
         ("MAX_RETRY_ATTEMPTS", "11"),
+        ("MAX_RETRY_ATTEMPTS", "-1"),
     ],
     ids=[
         "timeout_zero",
@@ -90,6 +91,7 @@ def test_settings_raises_when_api_key_is_empty(env: pytest.MonkeyPatch) -> None:
         "backoff_zero",
         "max_wait_zero",
         "retry_exceeds_upper_bound",
+        "retry_below_lower_bound",
     ],
 )
 def test_settings_raises_for_out_of_bounds_value(
