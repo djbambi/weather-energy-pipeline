@@ -15,7 +15,7 @@ def env(monkeypatch: pytest.MonkeyPatch) -> pytest.MonkeyPatch:
 
 
 def test_settings_loads_with_only_required_fields(env: pytest.MonkeyPatch) -> None:
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.openweather_api_key == "test-api-key"
     # Verify defaults exist and satisfy their own constraints — don't hardcode values
@@ -28,7 +28,7 @@ def test_settings_loads_with_only_required_fields(env: pytest.MonkeyPatch) -> No
 
 def test_settings_base_url_points_to_expected_endpoint(env: pytest.MonkeyPatch) -> None:
     """The base URL is a critical contract — assert it explicitly."""
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert (
         settings.openweather_base_url
@@ -40,7 +40,7 @@ def test_settings_accepts_custom_values(env: pytest.MonkeyPatch) -> None:
     env.setenv("OPENWEATHER_TIMEOUT_S", "30.0")
     env.setenv("MAX_RETRY_ATTEMPTS", "5")
 
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     assert settings.openweather_timeout_s == 30.0
     assert settings.max_retry_attempts == 5
@@ -50,7 +50,7 @@ def test_settings_accepts_custom_values(env: pytest.MonkeyPatch) -> None:
 
 
 def test_settings_is_frozen(env: pytest.MonkeyPatch) -> None:
-    settings = Settings()
+    settings = Settings(_env_file=None)
 
     with pytest.raises(ValidationError):
         settings.openweather_api_key = "changed"  # type: ignore[misc]
