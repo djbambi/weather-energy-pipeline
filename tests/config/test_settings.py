@@ -6,8 +6,8 @@ from weather_energy_pipeline.config.settings import Settings
 
 @pytest.fixture()
 def env(monkeypatch: pytest.MonkeyPatch) -> pytest.MonkeyPatch:
-    """Provide a monkeypatch with the minimum required env vars pre-set."""
     monkeypatch.setenv("OPENWEATHER_API_KEY", "test-api-key")
+    monkeypatch.setenv("BRONZE_BUCKET_NAME", "test-bucket")
     return monkeypatch
 
 
