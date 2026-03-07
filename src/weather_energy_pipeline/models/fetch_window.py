@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import date
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, frozen=True)
 class FetchWindow:
     """
     Represents the time window for which data should be fetched
