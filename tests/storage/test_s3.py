@@ -77,3 +77,20 @@ def test_store_serializes_expected_fields() -> None:
     assert '"dataset_name": "weather"' in body
     assert '"source_name": "openweather"' in body
     assert '"content_type": "application/json"' in body
+
+
+def test_build_key_zero_padded_month_and_day() -> None:
+    payload = RawPayload(
+        dataset_name="weather",
+        source_type="api",
+        source_name="openweather",
+        extracted_at=datetime(2026, 1, 5),
+        content_type="application/json",
+        payload={"test": "data"},
+    )
+
+    key = S3RawStorage._build_key(payload)
+
+    assert "year=2026" in key
+    assert "month=01" in key
+    assert "day=05" in key
