@@ -1,4 +1,5 @@
 import json
+from dataclasses import asdict
 from typing import TYPE_CHECKING, Any, Protocol
 
 from mypy_boto3_s3 import S3Client
@@ -80,12 +81,6 @@ class S3RawStorage(RawStorage):
 
     @staticmethod
     def _serialize_payload(payload: RawPayload) -> str:
-        document = {
-            "dataset_name": payload.dataset_name,
-            "source_type": payload.source_type,
-            "source_name": payload.source_name,
-            "extracted_at": payload.extracted_at.isoformat(),
-            "content_type": payload.content_type,
-            "payload": payload.payload,
-        }
+        document = asdict(payload)
+        document["extracted_at"] = payload.extracted_at.isoformat()
         return json.dumps(document)
