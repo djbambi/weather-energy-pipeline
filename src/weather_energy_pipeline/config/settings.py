@@ -32,8 +32,9 @@ class Settings(BaseSettings):
     # -------------------------
 
     bronze_bucket_name: str = Field(
-        min_length=1,
-        description="S3 bucket for Bronze raw data storage",
+        min_length=3,
+        max_length=63,
+        pattern=r"^[a-z0-9][a-z0-9\-]{1,61}[a-z0-9]$",
     )
 
     model_config = SettingsConfigDict(
