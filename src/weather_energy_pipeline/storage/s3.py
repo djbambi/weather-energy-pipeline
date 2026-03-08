@@ -1,10 +1,13 @@
 import json
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from mypy_boto3_s3 import S3Client
 
 from weather_energy_pipeline.models.raw_payload import RawPayload
 from weather_energy_pipeline.storage.base import RawStorage
+
+if TYPE_CHECKING:
+    from mypy_boto3_s3 import S3Client
 
 
 class SupportsS3PutObject(Protocol):
