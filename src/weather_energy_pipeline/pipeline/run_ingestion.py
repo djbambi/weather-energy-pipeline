@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 
 import boto3
@@ -11,6 +12,7 @@ from weather_energy_pipeline.storage.s3 import Boto3S3ClientAdapter, S3RawStorag
 
 
 def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     settings = get_settings()
 
     # API layer
