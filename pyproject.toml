@@ -26,11 +26,11 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "boto3-stubs[s3]>=1.42.63",
-    "mypy>=1.19.1",
     "pre-commit>=4.5.1",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.15.5",
+    "ty>=0.0.21",
 ]
 
 # -------------------------
@@ -60,14 +60,9 @@ markers = [
 ]
 
 # -------------------------
-# MyPy
+# ty (type checking)
 # -------------------------
-[tool.mypy]
-python_version = "3.12"
-strict = true
-explicit_package_bases = true
-warn_return_any = true
-show_error_codes = true
-pretty = true
-mypy_path = "src"
-plugins = ["pydantic.mypy"]
+[tool.ty]
+
+[tool.ty.environment]
+python-version = "3.12"

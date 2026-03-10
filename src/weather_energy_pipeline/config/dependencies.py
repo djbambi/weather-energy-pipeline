@@ -6,4 +6,4 @@ from weather_energy_pipeline.config.settings import Settings
 @lru_cache
 def get_settings() -> Settings:
     """Return the cached application settings."""
-    return Settings()
+    return Settings()  # ty: ignore[missing-argument]  # populated from env vars

@@ -8,9 +8,9 @@ format:
 lint:
 	uv run ruff check .
 
-# Check types with mypy
+# Check types with ty
 type:
-	uv run mypy src/
+	uv run ty check src/
 
 # Auto-fix linting issues
 fix:
@@ -20,7 +20,7 @@ fix:
 check:
 	uv run ruff check .
 	uv run ruff format --check .
-	uv run mypy src/
+	uv run ty check src/
 
 # Run tests
 test:
