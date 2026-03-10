@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 from typing import Any, Protocol
 
@@ -8,6 +9,8 @@ from weather_energy_pipeline.models.fetch_window import FetchWindow
 
 type RequestParams = dict[str, str | int | float]
 type RequestHeaders = dict[str, str]
+
+logger = logging.getLogger(__name__)
 
 
 class SupportsResponse(Protocol):
@@ -75,6 +78,15 @@ class OpenWeatherApiClient:
             "Accept": "application/json",
         }
 
+        logger.info(
+            "Fetching day summary for %s (lat=%.4f, lon=%.4f)",
+            window.start_date,
+            latitude,
+            longitude,
+        )
+        logger.debug(
+            "Request params: lat=%s, lon=%s, date=%s", latitude, longitude, window.start_date
+        )
         response = self._session.get(
             self._settings.openweather_base_url,
             params=params,
@@ -82,6 +94,7 @@ class OpenWeatherApiClient:
             timeout=self._settings.openweather_timeout_s,
         )
         response.raise_for_status()
+        logger.info("Received response from OpenWeather API")
 
         payload = response.json()
         if not isinstance(payload, dict):
