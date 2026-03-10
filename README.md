@@ -30,3 +30,39 @@ The project uses modern Python tooling:
 - `mypy` for static typing
 - `pytest` for testing
 - `pre-commit` for automated checks
+
+## Best Practices & Tasks Checklist
+
+This checklist tracks best practices and tasks adapted from the original airflow_dag_data_pipeline project, ensuring lessons learned and improvements are applied here:
+
+### API & Data Source
+- [ ] Modularize API client so endpoints are easy to switch
+- [ ] Optionally add FastAPI endpoint to serve pipeline results
+
+### Infrastructure & DevOps
+- [ ] Enforce dependency locking in CI (`uv sync --dev --frozen`)
+- [ ] Optionally add `infra/` directory for infrastructure as code
+
+### Architecture & Refactoring
+- [ ] Add helpers for API request parameter construction
+- [ ] Save output files with date-based filenames
+- [ ] Use dependency injection for config/settings (avoid import-time init)
+- [ ] Separate business logic from data engineering logic in `src/`
+
+### Error Handling & Logging
+- [ ] Use Pydantic’s `HttpUrl` for endpoint validation
+- [ ] User-friendly error handling for config validation
+- [ ] Robust logging for exceptions and retries
+
+### Testing
+- [ ] Add tests for retry loops and API call failures
+- [ ] Optimize pytest fixture scopes
+- [ ] Parametrize and consolidate tests in pytest
+
+### Tooling
+- [ ] Integrate `mypy` for static typing
+- [ ] Configure `ruff` and `pre-commit` for linting and formatting
+
+---
+
+*This checklist is a guide for implementing modern Python best practices and continuous improvement in this project.*
