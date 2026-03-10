@@ -1,151 +1,164 @@
 # Weather Energy Pipeline
 
-A Python data pipeline that ingests weather and energy generation data and processes it through a Bronze, Silver, and Gold architecture.
+A Python data pipeline that ingests weather data from the OpenWeather API and stores raw payloads in an S3-based Bronze layer. The project is the successor to [airflow_dag_data_pipeline](https://github.com/djbambi/airflow_dag_data_pipeline), rebuilt from scratch with clean architecture and modern Python tooling.
 
-The pipeline is designed to demonstrate production-grade Python practices, including:
+> **Current status:** The Bronze (raw ingestion) layer is working. Silver, Gold, orchestration, and additional data sources are planned.
 
-- Typed domain models
-- Repository-based data ingestion
-- Configuration validation using Pydantic
-- Prefect orchestration
-- AWS S3 data lake storage
-- Automated linting, formatting, and testing
+## What's implemented
 
-## Architecture (in progress)
+- **Bronze ingestion** — OpenWeather day-summary data fetched via a typed API client and persisted to S3 with date-partitioned keys (`bronze/{dataset}/{source}/year=YYYY/month=MM/day=DD/payload.json`)
+- **Clean architecture** — Protocol-based dependency injection, ABC contracts for repositories and storage, frozen Pydantic settings with lazy `@lru_cache` initialisation
+- **Immutable domain models** — `FetchWindow` and `RawPayload` as frozen dataclasses with validation
+- **Adapter pattern** — `Boto3S3ClientAdapter` wraps the boto3 client behind a `SupportsS3PutObject` protocol so storage is testable without AWS
+- **Test doubles** — `DummySession` and `DummyS3Client` implement the Protocols for isolated unit tests
 
-The pipeline will ingest data from multiple sources such as APIs, CSV files, and databases.
+## Project structure
 
-Data will flow through the following layers:
-
-- **Bronze** – raw source data stored in S3
-- **Silver** – cleaned and standardised datasets
-- **Gold** – analytical tables (facts and dimensions)
+```
+src/weather_energy_pipeline/
+├── clients/          # API clients (OpenWeather)
+│   └── openweather.py
+├── config/           # Pydantic settings + cached dependency provider
+│   ├── settings.py
+│   └── dependencies.py
+├── models/           # Domain value objects
+│   ├── fetch_window.py
+│   └── raw_payload.py
+├── repositories/     # Data-source abstractions (ABC → concrete)
+│   ├── base.py
+│   └── openweather.py
+├── storage/          # Persistence abstractions (ABC → S3)
+│   ├── base.py
+│   └── s3.py
+└── pipeline/         # Entry-point orchestration
+    └── run_ingestion.py
+```
 
 ## Development
 
-The project uses modern Python tooling:
+### Prerequisites
 
-- `uv` for dependency management
-- `ruff` for linting and formatting
-- `mypy` for static typing
-- `pytest` for testing
-- `pre-commit` for automated checks
+- Python 3.12
+- [uv](https://docs.astral.sh/uv/) for dependency management
 
-## Best Practices & Tasks Checklist
+### Setup
 
-This checklist tracks best practices and tasks adapted from the original airflow_dag_data_pipeline project, ensuring lessons learned and improvements are applied here:
+```bash
+uv sync --dev          # install all dependencies (including dev)
+cp .env.example .env   # add your OPENWEATHER_API_KEY and BRONZE_BUCKET_NAME
+```
 
-### API & Data Source
-- [ ] Modularize API client so endpoints are easy to switch
-- [ ] Optionally add FastAPI endpoint to serve pipeline results
+### Common commands
 
-### Infrastructure & DevOps
-- [ ] Enforce dependency locking in CI (`uv sync --dev --frozen`)
-- [ ] Optionally add `infra/` directory for infrastructure as code
-
-### Architecture & Refactoring
-- [ ] Add helpers for API request parameter construction
-- [ ] Save output files with date-based filenames
-- [ ] Use dependency injection for config/settings (avoid import-time init)
-- [ ] Separate business logic from data engineering logic in `src/`
-
-### Error Handling & Logging
-- [ ] Use Pydantic’s `HttpUrl` for endpoint validation
-- [ ] User-friendly error handling for config validation
-- [ ] Robust logging for exceptions and retries
-
-### Testing
-- [ ] Add tests for retry loops and API call failures
-- [ ] Optimize pytest fixture scopes
-- [ ] Parametrize and consolidate tests in pytest
+| Command | What it does |
+|---------|-------------|
+| `make test` | Run pytest |
+| `make lint` | Ruff lint check |
+| `make format` | Ruff auto-format |
+| `make type` | `ty` type check on `src/` |
+| `make check` | All static checks (lint + format + type) |
+| `make fix` | Auto-fix ruff issues |
+| `make pre-commit` | Run all pre-commit hooks |
 
 ### Tooling
-- [ ] Integrate `mypy` for static typing
-- [ ] Configure `ruff` and `pre-commit` for linting and formatting
+
+| Tool | Purpose |
+|------|---------|
+| **uv** | Dependency management and lockfile (`uv.lock`) |
+| **ruff** | Linting (E, F, W, I, B, UP) and formatting |
+| **ty** | Type checking (Astral's type checker) |
+| **pytest** | Testing with coverage support |
+| **pre-commit** | ruff + standard hooks (trailing whitespace, YAML, TOML) |
 
 ---
 
-*This checklist is a guide for implementing modern Python best practices and continuous improvement in this project.*
+## Original issues tracker
 
-# Project Plan: Weather-Energy-Pipeline
+This project carries forward 16 open issues from the original [airflow_dag_data_pipeline](https://github.com/djbambi/airflow_dag_data_pipeline). The tables below track each one against the current codebase.
 
-This plan lays out the roadmap for building a production-grade, medallion-architecture pipeline for weather and energy data, taking inspiration from the best-practices checklist of the original airflow_dag_data_pipeline project. Tasks already partially or fully implemented are marked, new steps are added, and optional learning extensions are included.
+### Resolved
 
----
+| Original | Issue | How it's addressed |
+|----------|-------|--------------------|
+| [#10](https://github.com/djbambi/airflow_dag_data_pipeline/issues/10) | Extract request param construction into client helper | `OpenWeatherApiClient.fetch_day_summary()` builds params internally |
+| [#14](https://github.com/djbambi/airflow_dag_data_pipeline/issues/14) | Date-based filenames | `S3RawStorage._build_key()` generates `year=YYYY/month=MM/day=DD/` paths |
+| [#36](https://github.com/djbambi/airflow_dag_data_pipeline/issues/36) | Remove import-time Settings init | `get_settings()` with `@lru_cache` — lazy, never at import time |
+| [#53](https://github.com/djbambi/airflow_dag_data_pipeline/issues/53) | Switch from mypy to ty | `ty` configured in `pyproject.toml`, Makefile target runs `ty check` |
+| [#55](https://github.com/djbambi/airflow_dag_data_pipeline/issues/55) | Separate business logic from data engineering | Layered `src/` layout: clients → repositories → storage → pipeline |
 
-## Checklist (Status in Brackets)
+### Open — next up
 
-### API & Data Source
-- [x] Modularize API client so endpoints are easy to switch *(clients & repositories exist, extend for more APIs)*
-- [ ] Optionally add FastAPI endpoint to serve pipeline results
+| Original | Issue | What's needed |
+|----------|-------|---------------|
+| [#19](https://github.com/djbambi/airflow_dag_data_pipeline/issues/19) | Restore `HttpUrl` for base URL | Change `openweather_base_url: str` to `HttpUrl` in `settings.py` |
+| [#29](https://github.com/djbambi/airflow_dag_data_pipeline/issues/29) | User-friendly error for missing env vars | Catch `ValidationError` in `main()`, print clean message, exit 1 |
+| [#39](https://github.com/djbambi/airflow_dag_data_pipeline/issues/39) | Log HTTP status on retry | Implement retry logic in the API client using the existing retry settings, add `logging` |
+| [#34](https://github.com/djbambi/airflow_dag_data_pipeline/issues/34) | Retry loop tests | Blocked on #39 — once retries exist, add tests for 503→200 scenarios |
+| [#18](https://github.com/djbambi/airflow_dag_data_pipeline/issues/18) | Frozen/locked installs in CI | Create a GitHub Actions workflow using `uv sync --dev --frozen` |
+| [#40](https://github.com/djbambi/airflow_dag_data_pipeline/issues/40) | Review fixture scopes | Audit fixtures for `module`/`session` scope opportunities |
+| [#41](https://github.com/djbambi/airflow_dag_data_pipeline/issues/41) | Consolidate tests with parametrize | Merge similar test cases using `@pytest.mark.parametrize` |
 
-### Infrastructure & DevOps
-- [x] Enforce dependency locking in CI (`uv sync --dev --frozen`) *(check CI; uv.lock in repo)*
-- [ ] Optionally add `infra/` directory for infrastructure as code
+### Open — optional / future
 
-### Architecture & Refactoring
-- [x] Add helpers for API request parameter construction *(present, extend as needed)*
-- [x] Save output files with date-based filenames *(bronze partitioning implemented, review for silver/gold)*
-- [x] Use dependency injection for config/settings (avoid import-time init) *(get_settings pattern used)*
-- [x] Separate business logic from data engineering logic in `src/` *(modular src layout)*
+| Original | Issue | Notes |
+|----------|-------|-------|
+| [#51](https://github.com/djbambi/airflow_dag_data_pipeline/issues/51) | Switch to OpenMeteo API | Add as a second data source alongside OpenWeather |
+| [#52](https://github.com/djbambi/airflow_dag_data_pipeline/issues/52) | FastAPI endpoint | Serve pipeline results over HTTP |
+| [#54](https://github.com/djbambi/airflow_dag_data_pipeline/issues/54) | `infra/` directory for IaC | Pulumi or Terraform for S3 bucket provisioning |
 
-### Error Handling & Logging
-- [ ] Use Pydantic’s `HttpUrl` for endpoint validation *(confirm config usage)*
-- [ ] User-friendly error handling for config validation
-- [ ] Robust logging for exceptions and retries
+### Dropped
 
-### Testing
-- [ ] Add tests for retry loops and API call failures
-- [ ] Optimize pytest fixture scopes
-- [ ] Parametrize and consolidate tests in pytest
-
-### Tooling
-- [x] Integrate `mypy` for static typing
-- [x] Configure `ruff` and `pre-commit` for linting and formatting
-
----
-
-## Immediate Next Steps
-
-1. **Expand API Coverage**
-   - Add new API clients (energy/weather sources)
-   - Confirm API parameter helper abstraction is consistent
-
-2. **Build Silver Layer**
-   - Implement data cleaning and schema standardization
-   - Store cleaned data in S3 (silver layer), ensure partitioning and proper file naming
-
-3. **Build Gold Layer**
-   - Define fact and dimension models (star schema); materialize gold tables
-   - Store analytical outputs in S3 (gold layer)
-
-4. **Orchestrate with Prefect**
-   - Create Prefect flows for ingestion, cleaning, modeling
-
-5. **Error Handling & Logging**
-   - Use Pydantic's `HttpUrl` in config models
-   - Provide clear error messages for config issues
-   - Add logging for all pipeline failures, exceptions, and retries
-
-6. **Testing**
-   - Add pytest tests for retry mechanisms and edge cases
-   - Review and optimize fixture scopes
-   - Parametrize/merge repetitive tests
-
-7. **Optional Extensions**
-   - Add FastAPI endpoints for serving results
-   - Add `infra/` for S3 setup, cloud provisioning scripts
-   - Develop dashboards/notebooks for data analysis
+| Original | Issue | Reason |
+|----------|-------|--------|
+| [#12](https://github.com/djbambi/airflow_dag_data_pipeline/issues/12) | PySpark + Docker | Airflow/Spark-specific; not relevant to this architecture |
 
 ---
 
-## How to Use This Plan
+## Roadmap
 
-- Track progress by marking tasks as complete
-- Use the checklist for self-assessment and best practice
-- Open GitHub Issues for any actionable item you wish to discuss or further document
-- Expand this file as you learn, iterate, and build new pipeline features
+Work is sequenced so each phase builds on the previous one and delivers a working increment.
 
----
+### Phase 1 — Harden the Bronze layer
 
-*For checklist summary and quick reference, see the README. For detailed rationale, ongoing work, and implementation notes, use this document!*
+The ingestion path works but lacks resilience and observability.
+
+1. **Add structured logging** — configure Python `logging` across all modules; log API calls, S3 writes, and errors
+2. **Implement retry logic** — use the existing retry settings (`max_retry_attempts`, `retry_backoff_multiplier`, etc.) to add exponential backoff in `OpenWeatherApiClient` (#39)
+3. **Restore `HttpUrl` validation** — change `openweather_base_url` from `str` to Pydantic `HttpUrl` (#19)
+4. **User-friendly config errors** — catch `ValidationError` at the entry point, print a clean message listing each missing/invalid variable (#29)
+5. **Retry tests** — pytest cases that simulate transient failures (503 → 200) and verify the retry loop (#34)
+6. **Test improvements** — review fixture scopes (#40), add `@pytest.mark.parametrize` where tests repeat (#41)
+
+### Phase 2 — CI and reproducibility
+
+7. **GitHub Actions workflow** — lint, type-check, and test on push/PR; use `uv sync --dev --frozen` to enforce lockfile (#18)
+8. **Coverage gate** — add `pytest-cov` threshold to CI so coverage doesn't regress
+
+### Phase 3 — Silver layer
+
+9. **Define Silver models** — Pydantic models for cleaned/standardised weather records
+10. **Implement Silver transformation** — read Bronze JSON, validate, clean, and write to `silver/` partition in S3
+11. **Silver tests** — unit tests for transformation logic and edge cases
+
+### Phase 4 — Additional data sources
+
+12. **OpenMeteo client** — add a second API client and repository following the same Protocol pattern (#51)
+13. **Energy data source** — add an energy generation data client (API or CSV)
+
+### Phase 5 — Gold layer
+
+14. **Define fact/dimension models** — star-schema tables for analytical queries
+15. **Implement Gold aggregation** — read Silver data, compute metrics, write to `gold/` in S3
+16. **Gold tests**
+
+### Phase 6 — Orchestration with Prefect
+
+17. **Add Prefect dependency** and create flows/tasks wrapping each pipeline stage
+18. **Schedule flows** — daily ingestion, transformation, aggregation
+19. **Prefect dashboard** — configure for visibility into runs, retries, and failures
+
+### Optional extensions
+
+- **FastAPI** — serve Gold layer results over HTTP (#52)
+- **`infra/` directory** — Pulumi/Terraform for S3 and IAM provisioning (#54)
+- **Dashboards** — Jupyter notebooks or Streamlit for exploring Gold data
