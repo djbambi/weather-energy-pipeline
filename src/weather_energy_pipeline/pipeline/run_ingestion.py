@@ -3,6 +3,7 @@ from datetime import date
 
 import boto3
 from mypy_boto3_s3 import S3Client
+from rich.logging import RichHandler
 
 from weather_energy_pipeline.clients.openweather import OpenWeatherApiClient
 from weather_energy_pipeline.config.dependencies import get_settings
@@ -12,7 +13,11 @@ from weather_energy_pipeline.storage.s3 import Boto3S3ClientAdapter, S3RawStorag
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(name)s — %(message)s",
+        handlers=[RichHandler(rich_tracebacks=True)],
+    )
     settings = get_settings()
 
     # API layer
