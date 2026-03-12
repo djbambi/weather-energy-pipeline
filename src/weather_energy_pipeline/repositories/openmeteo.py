@@ -1,9 +1,12 @@
+import logging
 from datetime import UTC, datetime
 
 from weather_energy_pipeline.clients.openmeteo import OpenMeteoClient
 from weather_energy_pipeline.models.fetch_window import FetchWindow
 from weather_energy_pipeline.models.raw_payload import RawPayload
 from weather_energy_pipeline.repositories.base import DataSourceRepository
+
+logger = logging.getLogger(__name__)
 
 
 class OpenMeteoRepository(DataSourceRepository):
@@ -20,6 +23,13 @@ class OpenMeteoRepository(DataSourceRepository):
         self._longitude = longitude
 
     def fetch(self, window: FetchWindow) -> RawPayload:
+        logger.info(
+            "Fetching openmeteo data for %s → %s (%.2f, %.2f)",
+            window.start_date,
+            window.end_date,
+            self._latitude,
+            self._longitude,
+        )
         payload = self._client.fetch_daily(
             window=window,
             latitude=self._latitude,
