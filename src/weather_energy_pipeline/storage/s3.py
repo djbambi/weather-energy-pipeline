@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import asdict
 from typing import TYPE_CHECKING, Any, Protocol
 
@@ -6,6 +7,9 @@ from mypy_boto3_s3 import S3Client
 
 from weather_energy_pipeline.models.raw_payload import RawPayload
 from weather_energy_pipeline.storage.base import RawStorage
+
+logger = logging.getLogger(__name__)
+
 
 if TYPE_CHECKING:
     from mypy_boto3_s3 import S3Client
@@ -55,9 +59,10 @@ class S3RawStorage(RawStorage):
         self._s3_client = s3_client
 
     def store(self, payload: RawPayload) -> None:
-        """Persist the supplied raw payload to S3."""
         key = self._build_key(payload)
         body = self._serialize_payload(payload)
+
+        logger.info("Storing payload to s3://%s/%s", self._bucket_name, key)
 
         self._s3_client.put_object(
             Bucket=self._bucket_name,
@@ -65,6 +70,8 @@ class S3RawStorage(RawStorage):
             Body=body,
             ContentType="application/json",
         )
+
+        logger.info("Payload stored successfully (%d bytes)", len(body))
 
     @staticmethod
     def _build_key(payload: RawPayload) -> str:
