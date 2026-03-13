@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from weather_energy_pipeline.models.raw_payload import RawPayload
 from weather_energy_pipeline.storage.s3 import S3RawStorage
@@ -36,6 +36,7 @@ def test_store_writes_payload_to_expected_s3_key() -> None:
         dataset_name="weather",
         source_type="api",
         source_name="openweather",
+        data_date=date(2026, 3, 6),
         extracted_at=datetime(2026, 3, 6, 10, 30, 0, tzinfo=UTC),
         content_type="application/json",
         payload={"temperature": 12.3},
@@ -63,6 +64,7 @@ def test_store_serializes_expected_fields() -> None:
         dataset_name="weather",
         source_type="api",
         source_name="openweather",
+        data_date=date(2026, 3, 6),
         extracted_at=datetime(2026, 3, 6, 10, 30, 0, tzinfo=UTC),
         content_type="application/json",
         payload={"temperature": 12.3},
@@ -84,6 +86,7 @@ def test_build_key_zero_padded_month_and_day() -> None:
         dataset_name="weather",
         source_type="api",
         source_name="openweather",
+        data_date=date(2026, 1, 5),
         extracted_at=datetime(2026, 1, 5),
         content_type="application/json",
         payload={"test": "data"},

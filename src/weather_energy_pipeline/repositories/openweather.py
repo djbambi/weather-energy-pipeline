@@ -41,6 +41,7 @@ class OpenWeatherRepository(DataSourceRepository):
             dataset_name="weather",
             source_type="api",
             source_name="openweather",
+            data_date=window.start_date,
             extracted_at=datetime.now(UTC),
             content_type="application/json",
             payload=payload,

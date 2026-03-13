@@ -1,3 +1,4 @@
+import argparse
 import logging
 from datetime import date
 
@@ -14,12 +15,25 @@ from weather_energy_pipeline.repositories.openweather import OpenWeatherReposito
 from weather_energy_pipeline.storage.s3 import Boto3S3ClientAdapter, S3RawStorage
 
 
+def _parse_args() -> date:
+    parser = argparse.ArgumentParser(description="Run the weather/energy ingestion pipeline.")
+    parser.add_argument(
+        "--date",
+        required=True,
+        type=date.fromisoformat,
+        metavar="YYYY-MM-DD",
+        help="The date to fetch data for (e.g. 2026-03-02).",
+    )
+    return parser.parse_args().date
+
+
 def main() -> None:
     logging.basicConfig(
         level=logging.INFO,
         format="%(name)s — %(message)s",
         handlers=[RichHandler(rich_tracebacks=True)],
     )
+    target_date = _parse_args()
     settings = get_settings()
 
     # API layer
@@ -41,8 +55,8 @@ def main() -> None:
     )
 
     window = FetchWindow(
-        start_date=date(2026, 3, 2),
-        end_date=date(2026, 3, 2),
+        start_date=target_date,
+        end_date=target_date,
     )
 
     raw_payload = repository.fetch(window)

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 
@@ -15,6 +15,7 @@ class RawPayload:
     dataset_name: str
     source_type: str
     source_name: str
+    data_date: date
     extracted_at: datetime
     content_type: str
     payload: Any

@@ -37,6 +37,7 @@ def test_fetch_returns_raw_payload_with_correct_metadata():
     assert result.content_type == "application/json"
     assert result.payload == SAMPLE_PAYLOAD
     assert isinstance(result.extracted_at, datetime)
+    assert result.data_date == WINDOW.start_date
 
 
 def test_fetch_passes_window_and_coordinates_to_client():

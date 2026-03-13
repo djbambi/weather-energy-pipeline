@@ -75,11 +75,9 @@ class S3RawStorage(RawStorage):
 
     @staticmethod
     def _build_key(payload: RawPayload) -> str:
-        extracted_date = payload.extracted_at.date()
-
-        year = f"{extracted_date.year:04d}"
-        month = f"{extracted_date.month:02d}"
-        day = f"{extracted_date.day:02d}"
+        year = f"{payload.data_date.year:04d}"
+        month = f"{payload.data_date.month:02d}"
+        day = f"{payload.data_date.day:02d}"
 
         return (
             f"bronze/{payload.dataset_name}/{payload.source_name}/"
@@ -89,5 +87,6 @@ class S3RawStorage(RawStorage):
     @staticmethod
     def _serialize_payload(payload: RawPayload) -> str:
         document = asdict(payload)
+        document["data_date"] = payload.data_date.isoformat()
         document["extracted_at"] = payload.extracted_at.isoformat()
         return json.dumps(document)
