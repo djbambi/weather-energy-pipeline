@@ -1,0 +1,58 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+
+
+
+        {
+            "name": "Python: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Python: FastAPI Backend",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "fastapi_app:app",
+                "--reload"
+            ],
+            "cwd": "${workspaceFolder}/app",
+            "jinja": true,
+            "envFile": "${workspaceFolder}/.env",
+        },
+        {
+            "name": "Python: Streamlit Frontend",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "streamlit",
+            "args": [
+                "run",
+                "streamlit_app.py",
+            ],
+            "cwd": "${workspaceFolder}/app",
+            "jinja": true,
+            "justMyCode": false,
+            "envFile": "${workspaceFolder}/.env",
+        },
+    ],
+    "compounds": [
+        {
+            "name": "Python: Fullstack",
+            "configurations": [
+                "Python: Streamlit Frontend",
+                "Python: FastAPI Backend"
+            ],
+            // "preLaunchTask": "${defaultBuildTask}",
+            "stopAll": true
+        }
+    ]
+}
