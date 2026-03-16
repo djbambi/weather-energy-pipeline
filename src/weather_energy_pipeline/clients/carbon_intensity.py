@@ -22,10 +22,7 @@ class CarbonIntensityClient:
         window: FetchWindow,
         region: int,
     ) -> dict[str, Any]:
-        # offset to 00:01 to avoid the API returning the last slot of the previous day
-        start = self.format_utc(window.start_date, hour=0, minute=1)
-        end = self.format_utc(window.end_date, hour=23, minute=30)
-        full_url = f"{self.BASE_URL}/{start}/{end}/regionid/{region}"
+        full_url = self._build_url(window, region)
 
         logger.info(
             "Fetching Carbon Intensity daily data for %s to %s (Region=%d)",
@@ -56,3 +53,10 @@ class CarbonIntensityClient:
             tzinfo=UTC,
         )
         return dt.strftime("%Y-%m-%dT%H:%MZ")
+
+    @staticmethod
+    def _build_url(window: FetchWindow, region: int) -> str:
+        # offset to 00:01 to avoid the API returning the last slot of the previous day
+        start = CarbonIntensityClient.format_utc(window.start_date, hour=0, minute=1)
+        end = CarbonIntensityClient.format_utc(window.end_date, hour=23, minute=30)
+        return f"{CarbonIntensityClient.BASE_URL}/{start}/{end}/regionid/{region}"
