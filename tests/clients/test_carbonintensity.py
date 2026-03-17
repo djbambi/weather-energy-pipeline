@@ -12,7 +12,7 @@ region = 3
 
 def test_build_url_formats_dates_and_region_correctly():
     fetched_url = CarbonIntensityClient._build_url(window, region)
-    expected = "https://api.carbonintensity.org.uk/regional/intensity/2026-03-02T00:01Z/2026-03-02T23:30Z/regionid/3"
+    expected = "https://api.carbonintensity.org.uk/regional/intensity/2026-03-02T00:00Z/2026-03-02T23:30Z/regionid/3"
     assert fetched_url == expected
 
 

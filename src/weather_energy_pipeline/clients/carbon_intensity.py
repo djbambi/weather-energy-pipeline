@@ -57,6 +57,6 @@ class CarbonIntensityClient:
     @staticmethod
     def _build_url(window: FetchWindow, region: int) -> str:
         # offset to 00:01 to avoid the API returning the last slot of the previous day
-        start = CarbonIntensityClient.format_utc(window.start_date, hour=0, minute=1)
+        start = CarbonIntensityClient.format_utc(window.start_date, hour=0, minute=0)
         end = CarbonIntensityClient.format_utc(window.end_date, hour=23, minute=30)
         return f"{CarbonIntensityClient.BASE_URL}/{start}/{end}/regionid/{region}"
