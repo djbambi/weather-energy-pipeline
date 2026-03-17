@@ -43,7 +43,7 @@ class CarbonIntensityClient:
         return payload
 
     @staticmethod
-    def format_utc(date_value: date, hour: int, minute: int = 0) -> str:
+    def format_utc(date_value: date, hour: int, minute: int) -> str:
         dt = datetime(
             date_value.year,
             date_value.month,
