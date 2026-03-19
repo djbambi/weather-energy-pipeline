@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 from datetime import date
 
@@ -6,6 +7,7 @@ import boto3
 from mypy_boto3_s3 import S3Client
 from rich.logging import RichHandler
 
+from weather_energy_pipeline.clients.carbon_intensity import CarbonIntensityClient
 from weather_energy_pipeline.clients.openmeteo import OpenMeteoClient
 from weather_energy_pipeline.clients.openweather import OpenWeatherApiClient
 from weather_energy_pipeline.config.dependencies import get_settings
@@ -72,6 +74,11 @@ def main() -> None:
 
     openmeteo_payload = openmeteo_repo.fetch(window)
     storage.store(openmeteo_payload)
+
+    client = CarbonIntensityClient()
+    window = FetchWindow(start_date=date(2026, 3, 18), end_date=date(2026, 3, 18))
+    data = client.fetch_daily(window=window, region=3)
+    print(json.dumps(data, indent=2)[:3000])
 
 
 if __name__ == "__main__":
